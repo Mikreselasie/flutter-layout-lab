@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart'; // Import the logger package
 
 void main() {
   runApp(const MyApp());
@@ -11,108 +12,85 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Layout Lab',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Flutter Layout Example')),
+        body: MyForm(),
       ),
-      home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
+class MyForm extends StatefulWidget {
+  @override
+  _MyFormState createState() => _MyFormState();
+}
+
+class _MyFormState extends State<MyForm> {
+  final _formKey = GlobalKey<FormState>();
+  final Logger _logger = Logger(); // Initialize the logger
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Flutter Layout Example'),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: <Widget>[
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: const <Widget>[
+              Icon(Icons.star, color: Colors.blue),
+              Icon(Icons.favorite, color: Colors.red),
+              Icon(Icons.thumb_up, color: Colors.green),
+            ],
+          ),
+          const Text('Welcome to Flutter!'),
+          const Text('Building a layout is easy.'),
+          TextFormField(
+            decoration: const InputDecoration(labelText: 'Enter your name'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                _logger.i(
+                  'Form is valid. User input is logged.',
+                ); // Log the user input
+                _showAlertDialog(
+                  context,
+                  'Form Submitted',
+                  'User input is logged.',
+                );
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Welcome Card
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Icon(Icons.waving_hand, size: 50, color: Colors.blueAccent),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Welcome to Flutter!',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Building a layout is easy.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    );
+  }
 
-            const SizedBox(height: 20),
-
-            // Action Button
-            ElevatedButton.icon(
+  void _showAlertDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
               onPressed: () {
-                // Add functionality here (e.g., navigate or show dialog)
+                Navigator.of(context).pop(); // Close the dialog
               },
-              icon: const Icon(Icons.check_circle),
-              label: const Text('Start Building'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                textStyle: const TextStyle(fontSize: 16),
-                backgroundColor: Colors.deepPurple,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Info Section
-            const Text(
-              'Tips:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: const [
-                    ListTile(
-                      leading: Icon(Icons.check_circle, color: Colors.green),
-                      title: Text('Use widgets like Column, Row, and Stack'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.check_circle, color: Colors.green),
-                      title: Text('Wrap with Padding, SizedBox for spacing'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.check_circle, color: Colors.green),
-                      title: Text('Use Cards, Containers, and Decorations'),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
